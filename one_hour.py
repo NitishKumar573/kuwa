@@ -285,7 +285,7 @@ def process_10m_trigger(smart_api, symbol_info, sym_state):
     if sym_state["pending_signal"] not in ("BUY", "SELL"):
         return  # nothing to watch for right now
 
-    df_10m = fetch_candles(smart_api,symbol_info["token"],symbol_info["exchange"], 10, 10 * 8)
+    df_10m = fetch_candles(smart_api,symbol_info["token"],symbol_info["exchange"], "TEN_MINUTE", 10 * 8)
     if not is_last_candle_completed(df_10m, 10):
         return
 
@@ -376,6 +376,7 @@ def main():
     c1=False
 
     while True:
+        time.sleep(1)
         
         try:
             if not market_is_open():
@@ -420,7 +421,7 @@ def main():
             # ---- 10-MINUTE window: fetch every 10 min, but never at the ":15" mark ----
             elif now.minute in TEN_MIN_FETCH_MINUTES and last_10m_marker != current_hm:
                 last_10m_marker = current_hm
-                time.sleep(3)
+                time.sleep(6)
                 for symbol_info in WATCHLIST:
                     try:
                         process_10m_trigger(smart_api, symbol_info, state[symbol_info["trading_symbol"]])
