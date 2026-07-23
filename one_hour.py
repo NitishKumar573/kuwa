@@ -367,10 +367,10 @@ def main():
     last_1h_marker = None   # HH:MM of the last 1H fetch window we already handled
     last_10m_marker = None  # HH:MM of the last 10-min fetch window we already handled
     send_telegram("🤖 Algo trading bot started (Angel One SmartAPI). Watching: "
-           + ", ".join(c["symbol"] for c in WATCHLIST
+           + ", ".join(c["trading_symbol"] for c in WATCHLIST
            ))
     send_telegram2("🤖 Algo trading bot started (Angel One SmartAPI). Watching: "
-           + ", ".join(c["symbol"] for c in WATCHLIST
+           + ", ".join(c["trading_symbol"] for c in WATCHLIST
            ))
     c1=False
 
