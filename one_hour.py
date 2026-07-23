@@ -35,7 +35,7 @@ MARKET_CLOSE = "21:30"
 # ---- FIXED FETCH SCHEDULE ----
 # 1-Hour candles are fetched ONLY at these exact clock times (once each), never on every tick.
 ONE_HOUR_FETCH_TIMES = ["09:15", "10:15", "11:15", "12:15", "13:15", "14:15"]
-ONE_HOUR_FETCH_TIMES2 = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00"]
+ONE_HOUR_FETCH_TIMES2 = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00"]
 
 
 # 10-Minute candles are fetched every 10 minutes EXCEPT at the ":15" mark, because ":15" is
@@ -244,7 +244,6 @@ def process_1h_bias(smart_api,symbol_info, sym_state):
     symbol = symbol_info["trading_symbol"]
 
     df_1h = fetch_candles(smart_api,symbol_info["token"],symbol_info["exchange"], "ONE_HOUR", 60 * 3)
-    print(df_1h)
     if not is_last_candle_completed(df_1h, 60):
         log.debug(f"{symbol}: last 1H candle not completed yet, skipping this window.")
         return
@@ -269,6 +268,7 @@ def process_1h_bias(smart_api,symbol_info, sym_state):
                 sym_state["pending_signal"] = "BUY"
                 sym_state["pending_signal_1h_close_time"] = last_1h_time
                 log.info(f"{symbol}: 1H BUY bias confirmed (HA green + normal green). Watching 10min frame.")
+                send_telegram2(f"📈 {symbol}: 1H candle confirmed GREEN (HA + normal). Watching 10-min for entry trigger.")
                 send_telegram(f"📈 {symbol}: 1H candle confirmed GREEN (HA + normal). Watching 10-min for entry trigger.")
             else:
                 log.info(f"{symbol}: HA green but normal candle red — no bias, waiting for next 1H candle.")
@@ -282,6 +282,7 @@ def process_1h_bias(smart_api,symbol_info, sym_state):
                 sym_state["pending_signal_1h_close_time"] = last_1h_time
                 log.info(f"{symbol}: 1H SELL bias confirmed (HA red + normal red). Watching 10min frame.")
                 send_telegram(f"📉 {symbol}: 1H candle confirmed RED (HA + normal). Watching 10-min for exit trigger.")
+                send_telegram2(f"📉 {symbol}: 1H candle confirmed RED (HA + normal). Watching 10-min for exit trigger.")
             else:
                 log.info(f"{symbol}: HA red but normal candle green — no sell bias yet.")
         else:
@@ -378,9 +379,11 @@ def main():
 
     last_1h_marker = None   # HH:MM of the last 1H fetch window we already handled
     last_10m_marker = None  # HH:MM of the last 10-min fetch window we already handled
-    send_telegram("🤖 Algo trading bot started (Angel One SmartAPI). Watching: "
-           + ", ".join(c["trading_symbol"] for c in WATCHLIST
-           ))
+    last_10m_marker2 = None
+    last_10m_marker3 = None
+    #send_telegram("🤖 Algo trading bot started (Angel One SmartAPI). Watching: "
+     #     + ", ".join(c["trading_symbol"] for c in WATCHLIST
+     #     ))
     send_telegram2("🤖 Algo trading bot started (Angel One SmartAPI). Watching: "
            + ", ".join(c["trading_symbol"] for c in WATCHLIST
            ))
@@ -407,6 +410,7 @@ def main():
 
             now = datetime.now(ZoneInfo("Asia/Kolkata"))
             current_hm = now.strftime("%H:%M")
+            
             # ---- Hard stop-loss check runs every tick regardless of the fetch schedule ----
             """for symbol_info in WATCHLIST:
                 sym_state = state[symbol_info["trading_symbol"]]
@@ -444,17 +448,18 @@ def main():
                     time.sleep(1)  # small gap between symbols to respect API rate limits
 
                 save_state(state)
-            elif now.minute in ONE_HOUR_FETCH_TIMES2 and last_10m_marker != current_hm:
-                last_10m_marker = current_hm
+            elif current_hm in ONE_HOUR_FETCH_TIMES2 and last_10m_marker2 != current_hm:
+                last_10m_marker2 = current_hm
                 time.sleep(3)
+                
                 for symbol_info in WATCHLIST2:
                     try:
                         process_1h_bias(smart_api, symbol_info, state[symbol_info["trading_symbol"]])
                     except Exception as e:
                         log.error(f"Error processing 10min trigger for {symbol_info['trading_symbol']}: {e}", exc_info=True)
                     time.sleep(1)
-            elif now.minute in TEN_MIN_FETCH_MINUTES2 and last_10m_marker != current_hm:
-                 last_10m_marker = current_hm
+            elif now.minute in TEN_MIN_FETCH_MINUTES2 and last_10m_marker3 != current_hm:
+                 last_10m_marker3 = current_hm
                  time.sleep(6)
                  for symbol_info in WATCHLIST2:
                      try:
