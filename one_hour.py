@@ -380,7 +380,7 @@ def main():
             if not market_is_open():
                 log.info("Market closed. Sleeping 5 minutes.")
                 time.sleep(300)
-                if(!c1):
+                if(c1==False):
                     c1=True
                     msg="Market is closed "
                 continue
