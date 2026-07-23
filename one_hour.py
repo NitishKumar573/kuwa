@@ -42,7 +42,7 @@ ONE_HOUR_FETCH_TIMES2 = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00","1
 # already handled by the 1-Hour fetch above and would otherwise just re-read the same
 # just-closed 1H candle boundary (e.g. 9:25, 9:35, 9:45, 9:55, 10:05, 10:25, 10:35 ... — never 9:15/10:15/...).
 TEN_MIN_FETCH_MINUTES = {5, 25, 35, 45, 55}
-TEN_MIN_FETCH_MINUTES = {0, 10, 20, 30, 40,50}
+TEN_MIN_FETCH_MINUTES2 = {0, 10, 20, 30, 40,50}
 smartApi = SmartConnect(api_key=API_KEY)
 totp = pyotp.TOTP(TOTP_SECRET).now()
 
@@ -450,7 +450,7 @@ def main():
                     except Exception as e:
                         log.error(f"Error processing 10min trigger for {symbol_info['trading_symbol']}: {e}", exc_info=True)
                     time.sleep(1)
-             elif now.minute in TEN_MIN_FETCH_MINUTES and last_10m_marker != current_hm:
+             elif now.minute in TEN_MIN_FETCH_MINUTES2 and last_10m_marker != current_hm:
                 last_10m_marker = current_hm
                 time.sleep(6)
                 for symbol_info in WATCHLIST2:
