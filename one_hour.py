@@ -29,12 +29,14 @@ ORDER_VARIETY = "NORMAL"
 LOOP_SLEEP_SECONDS = 30      # how often the main loop ticks
 STATE_FILE = "bot_state.json"
 
-MARKET_OPEN = "09:15"
-MARKET_CLOSE = "15:30"
+MARKET_OPEN = "09:00"
+MARKET_CLOSE = "21:30"
 
 # ---- FIXED FETCH SCHEDULE ----
 # 1-Hour candles are fetched ONLY at these exact clock times (once each), never on every tick.
 ONE_HOUR_FETCH_TIMES = ["09:15", "10:15", "11:15", "12:15", "13:15", "14:15"]
+ONE_HOUR_FETCH_TIMES2 = ["09:00", "10:00", "11:00", "12:15", "13:15", "14:15"]
+
 
 # 10-Minute candles are fetched every 10 minutes EXCEPT at the ":15" mark, because ":15" is
 # already handled by the 1-Hour fetch above and would otherwise just re-read the same
