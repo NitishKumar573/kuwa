@@ -451,14 +451,14 @@ def main():
                         log.error(f"Error processing 10min trigger for {symbol_info['trading_symbol']}: {e}", exc_info=True)
                     time.sleep(1)
              elif now.minute in TEN_MIN_FETCH_MINUTES2 and last_10m_marker != current_hm:
-                last_10m_marker = current_hm
-                time.sleep(6)
-                for symbol_info in WATCHLIST2:
-                    try:
-                        process_10m_trigger(smart_api, symbol_info, state[symbol_info["trading_symbol"]])
-                    except Exception as e:
-                        log.error(f"Error processing 10min trigger for {symbol_info['trading_symbol']}: {e}", exc_info=True)
-                    time.sleep(1)  
+                 last_10m_marker = current_hm
+                 time.sleep(6)
+                 for symbol_info in WATCHLIST2:
+                     try:
+                         process_10m_trigger(smart_api, symbol_info, state[symbol_info["trading_symbol"]])
+                     except Exception as e:
+                         log.error(f"Error processing 10min trigger for {symbol_info['trading_symbol']}: {e}", exc_info=True)
+                     time.sleep(1)  
 
             time.sleep(LOOP_SLEEP_SECONDS)
 
