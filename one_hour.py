@@ -20,6 +20,8 @@ TOTP_SECRET = "C4P6OKR4CY3QHB6DPTYGWLUIC4"     # Base32 secret from SmartAPI TOT
 
 TELEGRAM_BOT_TOKEN = "8842485648:AAGN8_S0PCv_jjxQMfvRPmdNkpPhbUT1SAQ"
 TELEGRAM_CHAT_ID = "926442490"
+TELEGRAM_BOT_TOKEN2="8869988041:AAHyS7goXL3TKCJI-g2jNIi_jkMQU6-rcvo"
+TELEGRAM_CHAT_ID2 = "7984464288"
 
 DRY_RUN = False       # True = simulate orders only (no real order placed). Set False to go live.
 PRODUCT_TYPE = "INTRADAY"   # INTRADAY / DELIVERY / CARRYFORWARD (Angel One naming)
@@ -82,6 +84,12 @@ def send_telegram(message: str):
     try:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=10)
+    except Exception as e:
+        log.error(f"Telegram send failed: {e}")
+def send_telegram2(message:str):
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN2}/sendMessage"
+        requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID2, "text": message}, timeout=10)
     except Exception as e:
         log.error(f"Telegram send failed: {e}")
 # STATE PERSISTENCE
@@ -320,6 +328,7 @@ def process_10m_trigger(smart_api, symbol_info, sym_state):
                 )
                 log.info(msg)
                 send_telegram(msg)
+                send_telegram2(msg)
         else:
             log.info(
                 f"{symbol}: 10min candle at {last_10m_time} not both-green "
@@ -335,6 +344,7 @@ def process_10m_trigger(smart_api, symbol_info, sym_state):
                 msg = f"✅ SELL TRIGGERED: {symbol} @ ~{exit_price} (pattern exit)"
                 log.info(msg)
                 send_telegram(msg)
+                send_telegram2(msg)
                 sym_state["position"] = None
                 #sym_state["position"] = None
                 #sym_state["pending_signal_1h_close_time"] = None
@@ -356,15 +366,23 @@ def main():
 
     last_1h_marker = None   # HH:MM of the last 1H fetch window we already handled
     last_10m_marker = None  # HH:MM of the last 10-min fetch window we already handled
-    """send_telegram("🤖 Algo trading bot started (Angel One SmartAPI). Watching: "
+    send_telegram("🤖 Algo trading bot started (Angel One SmartAPI). Watching: "
            + ", ".join(c["symbol"] for c in WATCHLIST
-           ))"""
+           ))
+    send_telegram2("🤖 Algo trading bot started (Angel One SmartAPI). Watching: "
+           + ", ".join(c["symbol"] for c in WATCHLIST
+           ))
+    c1=False
 
     while True:
+        
         try:
             if not market_is_open():
                 log.info("Market closed. Sleeping 5 minutes.")
                 time.sleep(300)
+                if(!c1):
+                    c1=True
+                    msg="Market is closed "
                 continue
 
             for symbol_info in WATCHLIST:
@@ -420,6 +438,7 @@ def main():
         except Exception as e:
             log.error(f"Main loop error: {e}", exc_info=True)
             send_telegram(f"⚠️ Bot main loop error: {e}")
+            send_telegram2(f"⚠️ Bot main loop error: {e}")
             time.sleep(30)
 
 
