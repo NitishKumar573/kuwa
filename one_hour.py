@@ -43,6 +43,7 @@ ONE_HOUR_FETCH_TIMES2 = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00","1
 # just-closed 1H candle boundary (e.g. 9:25, 9:35, 9:45, 9:55, 10:05, 10:25, 10:35 ... — never 9:15/10:15/...).
 TEN_MIN_FETCH_MINUTES = {5, 25, 35, 45, 55}
 TEN_MIN_FETCH_MINUTES2 = {0, 10, 20, 30, 40,50}
+login_time=["9:00","9:20","12:00","15:00","18:00","21:00"]
 smartApi = SmartConnect(api_key=API_KEY)
 totp = pyotp.TOTP(TOTP_SECRET).now()
 
@@ -381,6 +382,7 @@ def main():
     last_10m_marker = None  # HH:MM of the last 10-min fetch window we already handled
     last_10m_marker2 = None
     last_10m_marker3 = None
+    last_10m_marker4 = None
     #send_telegram("🤖 Algo trading bot started (Angel One SmartAPI). Watching: "
      #     + ", ".join(c["trading_symbol"] for c in WATCHLIST
      #     ))
@@ -467,6 +469,9 @@ def main():
                      except Exception as e:
                          log.error(f"Error processing 10min trigger for {symbol_info['trading_symbol']}: {e}", exc_info=True)
                      time.sleep(1)  
+            if current_hm in login_time and last_10m_marker4  != current_hm:
+                last_10m_marker2 = current_hm
+                login()
 
             time.sleep(LOOP_SLEEP_SECONDS)
 
